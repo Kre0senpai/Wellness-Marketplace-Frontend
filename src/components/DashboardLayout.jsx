@@ -35,17 +35,24 @@ function DashboardLayout() {
   const currentUser = authService.getCurrentUser();
 
   // Navigation items for sidebar
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: Home },
-    { name: 'My Profile', path: '/dashboard/profile', icon: User },
-    { name: 'My Bookings', path: '/dashboard/bookings', icon: Calendar },
-    { name: 'My Orders', path: '/dashboard/orders', icon: ShoppingBag },
-    { name: 'Browse Practitioners', path: '/dashboard/practitioners', icon: Star },
-    { name: 'Browse Products', path: '/dashboard/products', icon: ShoppingBag },
-    { name: 'Community Q&A', path: '/dashboard/community', icon: MessageSquare },
-    { name: 'Recommendations', path: '/dashboard/recommendations', icon: Heart },
-    { name: 'Notifications', path: '/dashboard/notifications', icon: Bell },
-  ];
+// Inside DashboardLayout component, update navItems:
+const navItems = [
+  { name: 'Dashboard', path: '/dashboard', icon: Home },
+  { name: 'My Profile', path: '/dashboard/profile', icon: User },
+  
+  // Show Practitioner Profile only if user is a practitioner
+  ...(currentUser.role === 'PRACTITIONER' ? [
+    { name: 'Practitioner Profile', path: '/dashboard/practitioner-profile', icon: Star }
+  ] : []),
+  
+  { name: 'My Bookings', path: '/dashboard/bookings', icon: Calendar },
+  { name: 'My Orders', path: '/dashboard/orders', icon: ShoppingBag },
+  { name: 'Browse Practitioners', path: '/dashboard/practitioners', icon: Star },
+  { name: 'Browse Products', path: '/dashboard/products', icon: ShoppingBag },
+  { name: 'Community Q&A', path: '/dashboard/community', icon: MessageSquare },
+  { name: 'Recommendations', path: '/dashboard/recommendations', icon: Heart },
+  { name: 'Notifications', path: '/dashboard/notifications', icon: Bell },
+];
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
