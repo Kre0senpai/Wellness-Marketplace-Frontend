@@ -4,38 +4,28 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 // Auth Pages
 import Login from './pages/Login';
 import Register from './pages/Register';
-
-// Dashboard
-import DashboardLayout from './components/DashboardLayout';
-import DashboardHome from './pages/DashboardHome';
-
-// Profile Pages
-import Profile from './pages/Profile';
-import PractitionerProfile from './pages/PractitionerProfile';
-
-// Booking & Orders
-import Bookings from './pages/Bookings';
-import Orders from './pages/Orders';
-
-// Practitioners
-import BrowsePractitioners from './pages/BrowsePractitioners';
-import PractitionerDetail from './pages/PractitionerDetail';
-import BookingForm from './pages/BookingForm';
-
-// Products
-import BrowseProducts from './pages/BrowseProducts';
-
-// Community & Recommendations
-import CommunityQA from './pages/CommunityQA';
-import Recommendations from './pages/Recommendations';
+import ForgotPassword from './pages/ForgotPassword';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
+import DashboardLayout from './components/DashboardLayout';
+
+// Dashboard Pages
+import DashboardHome from './pages/DashboardHome';
+import Profile from './pages/Profile';
+import PractitionerProfile from './pages/PractitionerProfile';
+import Bookings from './pages/Bookings';
+import Orders from './pages/Orders';
+import BrowsePractitioners from './pages/BrowsePractitioners';
+import PractitionerDetail from './pages/PractitionerDetail';
+import BookingForm from './pages/BookingForm';
+import BrowseProducts from './pages/BrowseProducts';
+import CommunityQA from './pages/CommunityQA';
+import Recommendations from './pages/Recommendations';
+import Notifications from './pages/Notifications';
+import AdminDashboard from './pages/AdminDashboard';
 
 import './App.css';
-
-// Placeholder for Notifications
-const Notifications = () => <div className="p-8"><h1 className="text-3xl">Notifications - Coming Soon</h1></div>;
 
 function App() {
   return (
@@ -44,6 +34,17 @@ function App() {
         {/* Public routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        
+        {/* Admin route - separate from dashboard */}
+        <Route 
+          path="/admin" 
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
         
         {/* Protected Dashboard routes */}
         <Route 
@@ -54,7 +55,6 @@ function App() {
             </ProtectedRoute>
           }
         >
-          {/* Nested routes */}
           <Route index element={<DashboardHome />} />
           <Route path="profile" element={<Profile />} />
           <Route path="practitioner-profile" element={<PractitionerProfile />} />
