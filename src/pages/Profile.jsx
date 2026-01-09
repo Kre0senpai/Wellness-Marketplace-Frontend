@@ -42,22 +42,18 @@ function Profile() {
   }, []);
 
   const loadProfile = async () => {
-    try {
-      // Adjust endpoint based on your backend
-      const response = await api.get(`/users/${currentUser.userId}`);
-      setProfileData(response.data);
-    } catch (error) {
-      console.error('Error loading profile:', error);
-      // If endpoint doesn't exist, use placeholder data
-      setProfileData({
-        id: currentUser.userId,
-        name: 'User Name',
-        email: 'user@example.com',
-        role: currentUser.role,
-        bio: 'Tell us about yourself...',
-      });
-    }
-  };
+  try {
+    const response = await api.get('/current');
+    setProfileData(response.data);
+  } catch (error) {
+  console.error(error);
+  setMessage({
+    type: 'error',
+    text: error.response?.status + ' ' + error.response?.data?.message,
+  });
+ }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -119,61 +115,56 @@ function Profile() {
   };
 
   const handleSaveProfile = async () => {
-    if (!validateProfile()) return;
-    
-    setLoading(true);
-    setMessage({ type: '', text: '' });
-    
-    try {
-      // Adjust endpoint based on your backend
-      await api.put('/users/profile', profileData);
-      
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
-      setEditing(false);
-      
-      // Reload profile
-      await loadProfile();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Failed to update profile' 
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!validateProfile()) return;
+
+  setLoading(true);
+  setMessage({ type: '', text: '' });
+
+  try {
+    await api.put('/profile', profileData);
+    setMessage({ type: 'success', text: 'Profile updated successfully!' });
+    setEditing(false);
+    await loadProfile();
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    setMessage({
+      type: 'error',
+      text: error.response?.data?.message || 'Failed to update profile',
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleChangePassword = async () => {
-    if (!validatePassword()) return;
-    
-    setLoading(true);
-    setMessage({ type: '', text: '' });
-    
-    try {
-      // Adjust endpoint based on your backend
-      await api.put('/users/password', {
-        currentPassword: passwordData.currentPassword,
-        newPassword: passwordData.newPassword,
-      });
-      
-      setMessage({ type: 'success', text: 'Password changed successfully!' });
-      setShowPasswordChange(false);
-      setPasswordData({
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-    } catch (error) {
-      console.error('Error changing password:', error);
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Failed to change password' 
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!validatePassword()) return;
+
+  setLoading(true);
+  setMessage({ type: '', text: '' });
+
+  try {
+    await api.put('/password', {
+      currentPassword: passwordData.currentPassword,
+      newPassword: passwordData.newPassword,
+    });
+
+    setMessage({ type: 'success', text: 'Password changed successfully!' });
+    setShowPasswordChange(false);
+    setPasswordData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    setMessage({
+      type: 'error',
+      text: error.response?.data?.message || 'Failed to change password',
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -461,5 +452,4 @@ function Profile() {
     </div>
   );
 }
-
 export default Profile;
