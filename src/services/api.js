@@ -187,4 +187,12 @@ export const notificationService = {
   getAll: () => api.get('/notifications'),
 };
 
+// ==================== ADMIN PRACTITIONER SERVICE ====================
+export const adminPractitionerService = {
+  getPending: () => api.get('../admin/practitioners/pending'),
+  verify: (id) => api.put(`../admin/practitioners/${id}/verify`),
+  reject: (id) => api.put(`../admin/practitioners/${id}/reject`)
+};
+
+
 export default api;
