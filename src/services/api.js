@@ -7,11 +7,21 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// REQUEST INTERCEPTOR - Add JWT token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  // CRITICAL: let browser set multipart boundary
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
   return config;
 });
+
 
 api.interceptors.response.use(
   (res) => res,
@@ -80,8 +90,15 @@ export const bookingService = {
 
 /* ================= PRACTITIONER ================= */
 export const practitionerService = {
-  create: (data) => api.post('/practitioners/create', data),
-  update: (data) => api.put('/practitioners/update', data),
+  create: (profileData) => api.post('/practitioners', profileData),
+  update: (profileData) => api.put('/practitioners/update', profileData),
+  uploadCertificate: (file) => {
+    const formData = new FormData();
+    formData.append("certificate", file);
+
+    return api.post("/practitioners/certificate", formData);
+  },
+  verify: (practitionerId) => api.get('/practitioners/verify', { params: { practitionerId } }),
   getVerified: () => api.get('/practitioners/verified'),
   getBySpecialization: (specialization) =>
     api.get('/practitioners/verified/specialization', { params: { specialization } }),
@@ -130,5 +147,13 @@ export const recommendationService = {
 export const notificationService = {
   getAll: () => api.get('/notifications'),
 };
+
+// ==================== ADMIN PRACTITIONER SERVICE ====================
+export const adminPractitionerService = {
+  getPending: () => api.get('../admin/practitioners/pending'),
+  verify: (id) => api.put(`../admin/practitioners/${id}/verify`),
+  reject: (id) => api.put(`../admin/practitioners/${id}/reject`)
+};
+
 
 export default api;

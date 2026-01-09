@@ -122,11 +122,7 @@ function PractitionerProfile() {
     setMessage({ type: '', text: '' });
 
     try {
-      const formData = new FormData();
-      formData.append('certificate', certificateFile);
-      formData.append('practitionerId', currentUser.userId);
-
-      await practitionerService.uploadCertificate(formData);
+      await practitionerService.uploadCertificate(certificateFile);
       setMessage({ type: 'success', text: 'Certificate uploaded successfully! Awaiting verification.' });
       setCertificateFile(null);
     } catch (error) {
