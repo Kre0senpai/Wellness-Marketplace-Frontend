@@ -12,16 +12,20 @@ const api = axios.create({
 });
 
 // REQUEST INTERCEPTOR - Add JWT token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  // CRITICAL: let browser set multipart boundary
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type'];
+  }
+
+  return config;
+});
+
 
 // RESPONSE INTERCEPTOR - Handle token refresh
 api.interceptors.response.use(
@@ -107,11 +111,14 @@ export const bookingService = {
 
 // ==================== PRACTITIONER SERVICE ====================
 export const practitionerService = {
-  create: (profileData) => api.post('/practitioners/create', profileData),
+  create: (profileData) => api.post('/practitioners', profileData),
   update: (profileData) => api.put('/practitioners/update', profileData),
-  uploadCertificate: (formData) => api.get('/practitioners/upload-certificate', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  }),
+  uploadCertificate: (file) => {
+    const formData = new FormData();
+    formData.append("certificate", file);
+
+    return api.post("/practitioners/certificate", formData);
+  },
   verify: (practitionerId) => api.get('/practitioners/verify', { params: { practitionerId } }),
   getVerified: () => api.get('/practitioners/verified'),
   getBySpecialization: (specialization) => api.get('/practitioners/verified/specialization', { 
