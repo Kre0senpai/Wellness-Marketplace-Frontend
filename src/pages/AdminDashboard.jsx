@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, X, Eye, Award, Clock, FileText, Mail, Phone } from 'lucide-react';
-import { practitionerService } from '../services/api';
+import { practitionerService, adminPractitionerService  } from '../services/api';
 
 /**
  * AdminDashboard Component
@@ -24,62 +24,83 @@ function AdminDashboard() {
   }, []);
 
   const loadPractitioners = async () => {
-    try {
-      // Load all practitioners (you might need different endpoints)
-      const verifiedRes = await practitionerService.getVerified();
-      const verified = (verifiedRes.data || []).map(p => ({ ...p, verified: true }));
-      
-      // For pending practitioners, you might need a different endpoint
-      // For now, we'll simulate some pending ones
-      const pending = [
-        {
-          id: 999,
-          userId: 5,
-          name: 'Dr. Jane Smith',
-          email: 'jane@example.com',
-          phone: '+1234567890',
-          specialization: 'Acupuncture',
-          experience: '8',
-          qualifications: 'Licensed Acupuncturist, Master of Traditional Chinese Medicine',
-          bio: 'Specialized in pain management and stress relief through acupuncture.',
-          verified: false,
-          certificateUrl: 'certificate-jane.pdf',
-        }
-      ];
-      
-      setPractitioners([...pending, ...verified]);
+  	try {
+	    setLoading(true);
+	
+	    const [pendingRes, verifiedRes] = await Promise.all([
+	      adminPractitionerService.getPending(),
+	      practitionerService.getVerified()
+	    ]);
+	
+	    const pending = (pendingRes.data || []).map(p => ({
+	      ...p,
+	      verified: false
+	    }));
+	
+	    const verified = (verifiedRes.data || []).map(p => ({
+	      ...p,
+	      verified: true
+	    }));
+
+	    setPractitioners([...pending, ...verified]);
+  
     } catch (error) {
       console.error('Error loading practitioners:', error);
+      setMessage({
+        type: 'error',
+        text: 'Failed to load practitioners'
+      });
     } finally {
       setLoading(false);
     }
   };
 
+
   const handleVerify = async (practitionerId) => {
     try {
-      await practitionerService.verify(practitionerId);
-      setMessage({ type: 'success', text: 'Practitioner verified successfully!' });
+      await adminPractitionerService.verify(practitionerId);
+
+      setMessage({
+        type: 'success',
+        text: 'Practitioner verified successfully!'
+      });
+
       setSelectedPractitioner(null);
       loadPractitioners();
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+
     } catch (error) {
       console.error('Error verifying practitioner:', error);
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.message || 'Failed to verify practitioner' 
+      setMessage({
+        type: 'error',
+        text: error.response?.data || 'Failed to verify practitioner'
       });
     }
   };
 
-  const handleReject = (practitionerId) => {
-    if (window.confirm('Are you sure you want to reject this practitioner application?')) {
-      // API call to reject
-      setPractitioners(practitioners.filter(p => p.id !== practitionerId));
-      setSelectedPractitioner(null);
-      setMessage({ type: 'success', text: 'Practitioner application rejected' });
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
-    }
-  };
+
+  const handleReject = async (practitionerId) => {
+  if (!window.confirm('Are you sure you want to reject this practitioner?')) return;
+
+  try {
+    await adminPractitionerService.reject(practitionerId);
+
+    setMessage({
+      type: 'success',
+      text: 'Practitioner rejected successfully'
+    });
+
+    setSelectedPractitioner(null);
+    loadPractitioners();
+
+  } catch (error) {
+    console.error('Error rejecting practitioner:', error);
+    setMessage({
+      type: 'error',
+      text: error.response?.data || 'Failed to reject practitioner'
+    });
+  }
+};
+
 
   const filteredPractitioners = practitioners.filter(p => {
     if (filter === 'PENDING') return !p.verified;
