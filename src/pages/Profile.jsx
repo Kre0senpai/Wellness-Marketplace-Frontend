@@ -43,15 +43,15 @@ function Profile() {
 
   const loadProfile = async () => {
   try {
-    const response = await api.get('/current');
+    const response = await api.get("/current");
     setProfileData(response.data);
   } catch (error) {
-  console.error(error);
-  setMessage({
-    type: 'error',
-    text: error.response?.status + ' ' + error.response?.data?.message,
-  });
- }
+    console.error(error);
+    setMessage({
+      type: 'error',
+      text: error.response?.data?.error || 'Failed to load profile'
+    });
+  }
 };
 
 
